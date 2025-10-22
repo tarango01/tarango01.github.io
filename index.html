@@ -1,1 +1,347 @@
-<h1>Tarango01</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Viewer App</title>
+    <style>
+        /* --- Basic Setup & Theming --- */
+        :root {
+            --bg-color: #1e1e1e;
+            --text-color: #d4d4d4;
+            --panel-bg: #252526;
+            --border-color: #3e3e42;
+            --accent-color: #007acc;
+            --hover-bg: #2a2d2e;
+            --selected-bg: #37373d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Main Layout --- */
+        header {
+            padding: 10px 20px;
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .container {
+            display: flex;
+            flex-grow: 1;
+            min-height: 0; /* Important for flexbox scrolling */
+        }
+
+        /* --- File Tree (Left Panel) --- */
+        #file-tree {
+            width: 300px;
+            min-width: 200px;
+            background-color: var(--panel-bg);
+            padding: 10px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+            user-select: none;
+        }
+
+        #file-tree ul {
+            list-style: none;
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        #file-tree li {
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #file-tree li:hover {
+            background-color: var(--hover-bg);
+        }
+
+        #file-tree li.selected {
+            background-color: var(--selected-bg);
+            font-weight: bold;
+        }
+        
+        /* Icons and Item types */
+        .item-icon {
+            margin-right: 8px;
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+        }
+
+        .folder > .item-icon::before {
+            content: '📁';
+        }
+        
+        .folder.expanded > .item-icon::before {
+            content: '📂';
+        }
+
+        .file > .item-icon::before {
+            content: '📄';
+        }
+        
+        /* Hide sub-folders by default */
+        .folder > ul {
+            display: none;
+        }
+
+        .folder.expanded > ul {
+            display: block;
+        }
+
+
+        /* --- Content Viewer (Right Panel) --- */
+        #content-viewer {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: auto;
+            background-color: var(--bg-color);
+        }
+        
+        #content-viewer .placeholder,
+        #content-viewer .loading,
+        #content-viewer .error {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        /* Styles for different content types */
+        #content-viewer pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: var(--panel-bg);
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: "Consolas", "Monaco", monospace;
+            font-size: 14px;
+        }
+
+        #content-viewer img {
+            max-width: 100%;
+            height: auto;
+            background: repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 50% / 20px 20px;
+            border-radius: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        HTML File Viewer
+    </header>
+
+    <div class="container">
+        <nav id="file-tree">
+            <!-- File tree will be generated here by JavaScript -->
+        </nav>
+        <main id="content-viewer">
+            <div class="placeholder">Select a file to view its content</div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileTreeContainer = document.getElementById('file-tree');
+            const contentViewer = document.getElementById('content-viewer');
+
+            const DATA_SOURCE_URL = 'https://tarango01.github.io/files.txt';
+
+            /**
+             * Fetches data from the source URL and initiates the app.
+             */
+            async function initializeApp() {
+                fileTreeContainer.innerHTML = '<ul><li>Loading file structure...</li></ul>';
+                try {
+                    const response = await fetch(DATA_SOURCE_URL);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    const textData = await response.text();
+                    const fileStructure = parseData(textData);
+                    renderFileTree(fileStructure, fileTreeContainer);
+                } catch (error) {
+                    console.error('Failed to fetch or process file data:', error);
+                    fileTreeContainer.innerHTML = `<ul><li style="color: #ff6b6b;">Error loading data.</li></ul>`;
+                }
+            }
+
+            /**
+             * Parses the raw text data into a hierarchical object (a tree).
+             * @param {string} textData - The raw text from files.txt
+             * @returns {object} A nested object representing the file structure.
+             */
+            function parseData(textData) {
+                const fileSystem = {};
+                const lines = textData.trim().split('\n');
+
+                lines.forEach(line => {
+                    // Example line: url:tarango01.github.io/test.html, location:(mainfile)/folder/filename.app
+                    const parts = line.split(',');
+                    if (parts.length !== 2) return;
+
+                    const urlPart = parts[0].trim().replace('url:', '');
+                    let locationPart = parts[1].trim().replace('location:', '').replace('(mainfile)/', '');
+
+                    // Ensure the URL has a protocol for fetching
+                    const fullUrl = urlPart.startsWith('http') ? urlPart : `https://${urlPart}`;
+                    
+                    const pathSegments = locationPart.split('/');
+                    let currentLevel = fileSystem;
+
+                    pathSegments.forEach((segment, index) => {
+                        const isLastSegment = index === pathSegments.length - 1;
+
+                        if (isLastSegment) {
+                            // It's a file
+                            currentLevel[segment] = {
+                                type: 'file',
+                                url: fullUrl
+                            };
+                        } else {
+                            // It's a folder
+                            if (!currentLevel[segment]) {
+                                currentLevel[segment] = {
+                                    type: 'folder',
+                                    children: {}
+                                };
+                            }
+                            currentLevel = currentLevel[segment].children;
+                        }
+                    });
+                });
+                return fileSystem;
+            }
+
+            /**
+             * Renders the file tree structure into the DOM.
+             * @param {object} fileSystem - The parsed file structure object.
+             * @param {HTMLElement} container - The element to render the tree into.
+             */
+            function renderFileTree(fileSystem, container) {
+                container.innerHTML = ''; // Clear previous content
+                const rootUl = document.createElement('ul');
+                
+                // Sort items to show folders before files
+                const sortedKeys = Object.keys(fileSystem).sort((a, b) => {
+                    const itemA = fileSystem[a];
+                    const itemB = fileSystem[b];
+                    if (itemA.type === 'folder' && itemB.type === 'file') return -1;
+                    if (itemA.type === 'file' && itemB.type === 'folder') return 1;
+                    return a.localeCompare(b); // Alphabetical sort for same types
+                });
+
+                for (const key of sortedKeys) {
+                    const item = fileSystem[key];
+                    const li = document.createElement('li');
+                    
+                    const iconSpan = document.createElement('span');
+                    iconSpan.className = 'item-icon';
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = key;
+                    
+                    li.appendChild(iconSpan);
+                    li.appendChild(nameSpan);
+
+                    if (item.type === 'folder') {
+                        li.className = 'folder';
+                        li.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Prevent parent folders from toggling
+                            li.classList.toggle('expanded');
+                        });
+                        // Recursively render children
+                        renderFileTree(item.children, li);
+                    } else {
+                        li.className = 'file';
+                        li.dataset.url = item.url;
+                        li.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            handleFileClick(li);
+                        });
+                    }
+                    rootUl.appendChild(li);
+                }
+                container.appendChild(rootUl);
+            }
+
+            /**
+             * Handles clicks on file items.
+             * @param {HTMLElement} fileElement - The clicked LI element for the file.
+             */
+            function handleFileClick(fileElement) {
+                // Remove 'selected' class from any other file
+                const currentlySelected = document.querySelector('#file-tree .selected');
+                if (currentlySelected) {
+                    currentlySelected.classList.remove('selected');
+                }
+                // Add 'selected' class to the clicked file
+                fileElement.classList.add('selected');
+
+                const fileUrl = fileElement.dataset.url;
+                displayFileContent(fileUrl);
+            }
+
+            /**
+             * Fetches and displays the content of a file.
+             * @param {string} url - The URL of the file to display.
+             */
+            async function displayFileContent(url) {
+                contentViewer.innerHTML = `<div class="loading">Loading content...</div>`;
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch file. Status: ${response.status}`);
+                    }
+                    
+                    const extension = url.split('.').pop().toLowerCase();
+                    
+                    // Handle images
+                    if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(extension)) {
+                        const blob = await response.blob();
+                        const objectURL = URL.createObjectURL(blob);
+                        contentViewer.innerHTML = `<img src="${objectURL}" alt="Image preview">`;
+                    } 
+                    // Handle text-based files
+                    else {
+                        const textContent = await response.text();
+                        const pre = document.createElement('pre');
+                        pre.textContent = textContent;
+                        contentViewer.innerHTML = '';
+                        contentViewer.appendChild(pre);
+                    }
+                } catch (error) {
+                    console.error('Error displaying file content:', error);
+                    contentViewer.innerHTML = `<div class="error">Could not load file preview.</div>`;
+                }
+            }
+
+            // Start the application
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
