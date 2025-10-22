@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Vector MCQ Quiz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&family=Poppins:wght@600&display=swap');
+
+        :root {
+            --primary-bg: #4e54c8;
+            --secondary-bg: #8f94fb;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-color: #333;
+            --accent-color: #f7b733;
+            --correct-color: #2ecc71;
+            --incorrect-color: #e74c3c;
+            --light-gray: #f0f0f0;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            --border-radius: 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: var(--primary-bg);
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: var(--primary-bg);
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--accent-color), #fdc830);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(247, 183, 51, 0.4);
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(247, 183, 51, 0.6);
+        }
+        
+        .btn.continue-btn {
+            background: linear-gradient(45deg, #2980b9, #3498db);
+             box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+        .btn.continue-btn:hover {
+             box-shadow: 0 7px 20px rgba(52, 152, 219, 0.6);
+        }
+
+
+        #quiz-screen .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        
+        #question-counter, #score-display {
+             background: var(--light-gray);
+             padding: 8px 15px;
+             border-radius: 20px;
+        }
+
+        #timer {
+            display: flex;
+            align-items: center;
+            font-size: 1.5em;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-bg);
+        }
+        
+        #timer-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: var(--light-gray);
+            border-radius: 5px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        #timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--correct-color), var(--accent-color));
+            width: 100%;
+            border-radius: 5px;
+            transition: width 1s linear;
+        }
+        
+        #question-text {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            min-height: 80px;
+        }
+        
+        #options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .option-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.1em;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--light-gray);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary-bg);
+            background-color: #f7f7ff;
+            transform: scale(1.02);
+        }
+        
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+            animation: pulse 0.5s;
+        }
+
+        .option-btn.incorrect {
+            background-color: var(--incorrect-color);
+            color: white;
+            border-color: var(--incorrect-color);
+            animation: shake 0.5s;
+        }
+        
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+
+        /* Overview Screen Styles */
+        #overview-screen h2 {
+            margin-bottom: 10px;
+        }
+
+        #overview-summary {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 25px;
+            background: var(--light-gray);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+        .summary-correct { color: var(--correct-color); }
+        .summary-incorrect { color: var(--incorrect-color); }
+
+        #overview-list {
+            max-height: 40vh;
+            overflow-y: auto;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+        .overview-item {
+            background: #fff;
+            border: 1px solid var(--light-gray);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative;
+            padding-right: 40px;
+        }
+        .overview-item p { margin-bottom: 8px; font-size: 1em; }
+        .overview-item .question { font-weight: bold; }
+        .overview-item .explanation {
+            font-size: 0.9em;
+            color: #555;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .overview-status {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            font-size: 2em;
+        }
+        .status-correct { color: var(--correct-color); }
+        .status-incorrect { color: var(--incorrect-color); }
+
+
+        /* Media Queries for Mobile Friendliness */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 { font-size: 2em; }
+            h2 { font-size: 1.5em; }
+            #question-text { font-size: 1.2em; min-height: 70px; }
+            #options-container {
+                grid-template-columns: 1fr;
+            }
+            .option-btn { padding: 15px; font-size: 1em; }
+            #quiz-screen .header {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1>ভেক্টর কুইজ চ্যালেঞ্জ</h1>
+            <p>এইচএসসি পদার্থবিজ্ঞানের ভেক্টর অধ্যায়ের উপর আপনার দক্ষতা যাচাই করুন। প্রতিটি প্রশ্নের জন্য সময় পাবেন ৩৭ সেকেন্ড।</p>
+            <p><strong>মোট ৩০টি প্রশ্ন</strong></p>
+            <button id="start-btn" class="btn">কুইজ শুরু করুন</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <div class="header">
+                <div id="question-counter"></div>
+                <div id="timer">
+                    <span id="timer-text">37</span>
+                </div>
+                <div id="score-display">স্কোর: 0</div>
+            </div>
+            <div id="timer-bar-container">
+                <div id="timer-bar"></div>
+            </div>
+            <div id="question-text"></div>
+            <div id="options-container"></div>
+        </div>
+        
+        <!-- Overview Screen -->
+        <div id="overview-screen" class="screen">
+            <h2 id="overview-title"></h2>
+            <div id="overview-summary"></div>
+            <div id="overview-list"></div>
+            <button id="continue-btn" class="btn continue-btn"></button>
+        </div>
+
+    </div>
+
+    <script>
+        const questions = [
+            // Type 1: Vector Basics (1-10)
+            {
+                question: "নিচের কোনটি ভেক্টর রাশি?",
+                options: ["কাজ", "শক্তি", "ভরবেগ", "ক্ষমতা"],
+                answer: "ভরবেগ",
+                explanation: "ভরবেগ (Momentum) এর মান ও দিক উভয়ই আছে, তাই এটি একটি ভেক্টর রাশি। কাজ, শক্তি ও ক্ষমতার শুধুমাত্র মান আছে।"
+            },
+            {
+                question: "দুটি ভেক্টরের মান কখন সমান হয়?",
+                options: ["যখন তাদের দিক এক হয়", "যখন তাদের মান ও দিক উভয়ই এক হয়", "যখন তাদের মান সমান হয়", "যখন তারা সমান্তরাল হয়"],
+                answer: "যখন তাদের মান ও দিক উভয়ই এক হয়",
+                explanation: "দুটি ভেক্টরকে সমান (Equal Vectors) বলা হয় যদি এবং কেবল যদি তাদের মান এবং দিক উভয়ই একই থাকে।"
+            },
+            {
+                question: "একটি বস্তুর উপর 5N এবং 3N মানের দুটি বল একই দিকে ক্রিয়া করলে লব্ধি বলের মান কত?",
+                options: ["2N", "8N", "4N", "15N"],
+                answer: "8N",
+                explanation: "দুটি বল একই দিকে ক্রিয়া করলে তাদের লব্ধি বল হবে বল দুটির মানের যোগফলের সমান। অর্থাৎ, R = 5N + 3N = 8N।"
+            },
+            {
+                question: "একটি ভেক্টরকে তার মান দ্বারা ভাগ করলে কী পাওয়া যায়?",
+                options: ["একটি স্কেলার", "শূন্য ভেক্টর", "একক ভেক্টর", "অবস্থান ভেক্টর"],
+                answer: "একক ভেক্টর",
+                explanation: "কোনো ভেক্টরকে তার মান দিয়ে ভাগ করলে ওই ভেক্টরের দিকে একটি একক ভেক্টর (Unit Vector) পাওয়া যায়, যার মান ১।"
+            },
+           {
+                question: "দুটি সমমানের ভেক্টরের লব্ধির মান এদের যেকোনো একটির মানের সমান হলে, ভেক্টরদ্বয়ের মধ্যবর্তী কোণ কত?",
+                options: ["90°", "120°", "60°", "180°"],
+                answer: "120°",
+                explanation: "সূত্র R² = P² + Q² + 2PQcos(α) অনুযায়ী, যদি P = Q = R হয়, তাহলে P² = P² + P² + 2P²cos(α), যা থেকে cos(α) = -1/2 পাওয়া যায়। সুতরাং, α = 120°।"
+            },
+            {
+                question: "বিপ্রতীপ ভেক্টর (Reciprocal Vector) কাকে বলে?",
+                options: ["যে ভেক্টরের মান শূন্য", "দুটি সমান ও বিপরীতমুখী ভেক্টর", "একটি ভেক্টরের সমান্তরাল কিন্তু মানের ব্যস্তানুপাতিক ভেক্টর", "যে ভেক্টরের মান এক"],
+                answer: "একটি ভেক্টরের সমান্তরাল কিন্তু মানের ব্যস্তানুপাতিক ভেক্টর",
+                explanation: "দুটি সমান্তরাল ভেক্টরের একটির মান যদি অন্যটির মানের ব্যস্তানুপাতিক হয়, তবে তাদেরকে একে অপরের বিপ্রতীপ ভেক্টর বলে।"
+            },
+            {
+                question: "কোনো ভেক্টরের আদিবিন্দু ও প্রান্তবিন্দু একই হলে তাকে কী বলে?",
+                options: ["একক ভেক্টর", "অবস্থান ভেক্টর", "সদৃশ ভেক্টর", "নাল ভেক্টর (শূন্য ভেক্টর)"],
+                answer: "নাল ভেক্টর (শূন্য ভেক্টর)",
+                explanation: "যে ভেক্টরের মান শূন্য, তাকে নাল ভেক্টর বা শূন্য ভেক্টর (Null Vector) বলে। এর আদিবিন্দু ও শেষবিন্দু একই হয়।"
+            },
+            {
+                question: "P = 3i + 4j একটি ভেক্টর হলে, এর মান কত?",
+                options: ["7", "1", "5", "12"],
+                answer: "5",
+                explanation: "কোনো ভেক্টর A = xi + yj হলে তার মান |A| = sqrt(x² + y²)। এখানে, মান = sqrt(3² + 4²) = sqrt(9 + 16) = sqrt(25) = 5।"
+            },
+            {
+                question: "ভেক্টর যোগের কোন সূত্রটি একাধিক ভেক্টর যোগের জন্য সুবিধাজনক?",
+                options: ["সাধারণ সূত্র", "ত্রিভুজ সূত্র", "বহুভুজ সূত্র", "সামান্তরিক সূত্র"],
+                answer: "বহুভুজ সূত্র",
+                explanation: "দুইয়ের অধিক ভেক্টর যোগ করার জন্য ভেক্টর যোগের বহুভুজ সূত্র (Polygon Law) ব্যবহার করা সবচেয়ে সুবিধাজনক।"
+            },
+            {
+                question: "যদি দুটি ভেক্টরের লব্ধির মান সর্বনিম্ন হয়, তবে তাদের মধ্যবর্তী কোণ কত?",
+                options: ["0°", "90°", "180°", "45°"],
+                answer: "180°",
+                explanation: "দুটি ভেক্টর পরস্পর বিপরীত দিকে ক্রিয়া করলে (মধ্যবর্তী কোণ 180°), তাদের লব্ধির মান সর্বনিম্ন হয়, যা ভেক্টর দুটির মানের বিয়োগফলের সমান।"
+            },
+            // Type 2: Vector Products (11-20)
+            {
+                question: "দুটি ভেক্টর A ও B এর ডট গুণফল A · B = 0 হলে, ভেক্টরদ্বয়—",
+                options: ["সমান্তরাল", "পরস্পর লম্ব", "সমান", "বিপরীত"],
+                answer: "পরস্পর লম্ব",
+                explanation: "A · B = |A||B|cos(θ)। যদি A · B = 0 হয় (এবং A, B অশূন্য ভেক্টর), তবে cos(θ) = 0, যার অর্থ θ = 90°। অর্থাৎ, ভেক্টর দুটি পরস্পর লম্ব।"
+            },
+            {
+                question: "i · i = ?",
+                options: ["0", "1", "j", "k"],
+                answer: "1",
+                explanation: "দুটি একই একক ভেক্টরের ডট গুণফল ১ হয়। কারণ i · i = |i||i|cos(0°) = 1 * 1 * 1 = 1।"
+            },
+            {
+                question: "দুটি ভেক্টরের ক্রস গুণফলের ফলে কোন ধরনের রাশি পাওয়া যায়?",
+                options: ["স্কেলার", "ভেক্টর", "শূন্য", "একক"],
+                answer: "ভেক্টর",
+                explanation: "দুটি ভেক্টরের ক্রস গুণফল বা ভেক্টর গুণফল একটি নতুন ভেক্টর রাশি তৈরি করে, যার দিক মূল ভেক্টরদ্বয়ের সমতলের উপর লম্ব হয়।"
+            },
+            {
+                question: "j × i = ?",
+                options: ["k", "-k", "0", "1"],
+                answer: "-k",
+                explanation: "ক্রস গুণফল বিনিময় সূত্র মানে না (A × B ≠ B × A)। চক্রীয় নিয়ম অনুযায়ী i × j = k, কিন্তু j × i = -k।"
+            },
+            {
+                question: "A = 2i + j এবং B = 3j - k হলে A · B কত?",
+                options: ["6", "5", "3", "2"],
+                answer: "3",
+                explanation: "A · B = (2i + j + 0k) · (0i + 3j - k) = (2*0) + (1*3) + (0*-1) = 0 + 3 + 0 = 3।"
+            },
+            {
+                question: "কোনো সামান্তরিকের দুটি সন্নিহিত বাহু দুটি ভেক্টর দ্বারা নির্দেশিত হলে, তার ক্ষেত্রফল কী হবে?",
+                options: ["ভেক্টরদ্বয়ের ডট গুণফল", "ভেক্টরদ্বয়ের ক্রস গুণফলের মান", "ভেক্টরদ্বয়ের মানের গুণফল", "ভেক্টরদ্বয়ের যোগফলের মান"],
+                answer: "ভেক্টরদ্বয়ের ক্রস গুণফলের মান",
+                explanation: "যদি কোনো সামান্তরিকের দুটি সন্নিহিত বাহু ভেক্টর A ও B দ্বারা নির্দেশিত হয়, তবে তার ক্ষেত্রফল হবে |A × B|।"
+            },
+            {
+                question: "যদি A × B = 0 হয়, তাহলে ভেক্টরদ্বয়—",
+                options: ["পরস্পর লম্ব", "সমান্তরাল বা সমরেখ", "একক ভেক্টর", "বিপ্রতীপ"],
+                answer: "সমান্তরাল বা সমরেখ",
+                explanation: "|A × B| = |A||B|sin(θ)। যদি |A × B| = 0 হয় (এবং A, B অশূন্য ভেক্টর), তবে sin(θ) = 0, যার অর্থ θ = 0° বা 180°। সুতরাং, ভেক্টর দুটি সমান্তরাল।"
+            },
+            {
+                question: "A ও B ভেক্টরদ্বয়ের মধ্যবর্তী কোণ θ হলে, |A × B| = ?",
+                options: ["AB cos(θ)", "AB tan(θ)", "AB sin(θ)", "AB"],
+                answer: "AB sin(θ)",
+                explanation: "ভেক্টর গুণন বা ক্রস গুণফলের সংজ্ঞা অনুযায়ী, |A × B| এর মান হলো A ও B ভেক্টরের মানের গুণফল এবং তাদের মধ্যবর্তী কোণের sine-এর গুণফলের সমান।"
+            },
+             {
+                question: "A = i + j এবং B = i - j ভেক্টরদ্বয়ের মধ্যবর্তী কোণ কত?",
+                options: ["0°", "45°", "90°", "180°"],
+                answer: "90°",
+                explanation: "A · B = (1*1) + (1*-1) = 1 - 1 = 0। যেহেতু তাদের ডট গুণফল শূন্য, তাই ভেক্টর দুটি পরস্পর লম্ব। অর্থাৎ, মধ্যবর্তী কোণ 90°।"
+            },
+             {
+                question: "একটি ভেক্টরের উপর অন্য একটি ভেক্টরের লম্ব অভিক্ষেপ নির্ণয়ে কোনটি ব্যবহৃত হয়?",
+                options: ["ভেক্টর যোগ", "ডট গুণফল", "ক্রস গুণফল", "ভেক্টর বিভাজন"],
+                answer: "ডট গুণফল",
+                explanation: "A ভেক্টরের উপর B ভেক্টরের লম্ব অভিক্ষেপ হলো B cos(θ), যা (A · B) / |A| থেকে পাওয়া যায়। সুতরাং ডট গুণফল ব্যবহৃত হয়।"
+            },
+
+            // Type 3: Applications of Vectors (21-30)
+            {
+                question: "নদীর স্রোতের বেগ 3 km/h এবং নৌকার বেগ 6 km/h হলে, সর্বনিম্ন সময়ে নদী পার হতে হলে নৌকা কোন দিকে চালাতে হবে?",
+                options: ["স্রোতের সাথে সমকোণে", "স্রোতের অনুকূলে", "স্রোতের প্রতিকূলে", "স্রোতের সাথে 120° কোণে"],
+                answer: "স্রোতের সাথে সমকোণে",
+                explanation: "সর্বনিম্ন সময়ে নদী পার হওয়ার জন্য, নৌকার বেগের উপাংশ নদীর প্রস্থ বরাবর সর্বোচ্চ হতে হয়। এটি তখনই সম্ভব যখন নৌকা ঠিক আড়াআড়ি বা স্রোতের সাথে 90° কোণে চালানো হয়।"
+            },
+            {
+                question: "বৃষ্টি খাড়াভাবে নিচে পড়ছে। একজন সাইকেল আরোহী পূর্ব দিকে গেলে, তার কাছে বৃষ্টি কোন দিকে পড়তে মনে হবে?",
+                options: ["খাড়াভাবে নিচে", "পূর্ব-দক্ষিণ কোণে", "পূর্ব-উত্তর কোণে", "পশ্চিম-দক্ষিণ কোণে"],
+                answer: "পূর্ব-দক্ষিণ কোণে",
+                explanation: "সাইকেল আরোহীর সাপেক্ষে বৃষ্টির আপেক্ষিক বেগ হবে বৃষ্টির বেগ (নিচের দিকে) এবং আরোহীর বেগের বিপরীত ভেক্টরের (পশ্চিম দিকে) লব্ধি। কিন্তু প্রশ্নটি সাধারণত ছাতা ধরার কোণ নিয়ে হয়, যেখানে আপেক্ষিক বেগের দিক হয় দক্ষিণ-পূর্ব কোণে।"
+            },
+            {
+                question: "r = (3t²i - 4tj + 5k) m একটি কণার অবস্থান ভেক্টর হলে, t=2s সময়ে বেগ কত?",
+                options: ["12i - 4j", "6i - 4j", "6i - 4j + 5k", "12i - 4j + 5k"],
+                answer: "12i - 4j",
+                explanation: "বেগ v = dr/dt = d/dt(3t²i - 4tj + 5k) = (6ti - 4j)। t = 2s সময়ে, v = 6(2)i - 4j = 12i - 4j m/s।"
+            },
+            {
+                question: "দুটি সমান মানের ভেক্টরের লব্ধি এদের যেকোনো একটির মানের সমান। ভেক্টরদ্বয়ের মধ্যবর্তী কোণ কত?",
+                options: ["90°", "60°", "120°", "45°"],
+                answer: "120°",
+                explanation: "ধরি, ভেক্টরদ্বয়ের মান P। লব্ধিও P। সূত্রানুসারে, R²=P²+Q²+2PQcosα ⇒ P²=P²+P²+2P²cosα ⇒ -P²=2P²cosα ⇒ cosα = -1/2। অতএব α = 120°।"
+            },
+            {
+                question: "একটি গাড়ি 10 m/s বেগে পূর্ব দিকে এবং একটি ট্রাক 10 m/s বেগে উত্তর দিকে চলছে। ট্রাকের সাপেক্ষে গাড়ির আপেক্ষিক বেগ কত?",
+                options: ["0 m/s", "20 m/s", "10√2 m/s", "10 m/s"],
+                answer: "10√2 m/s",
+                explanation: "ট্রাকের সাপেক্ষে গাড়ির আপেক্ষিক বেগ V_ct = V_c - V_t। এটি ভেক্টর বিয়োগ। V_c = 10i, V_t = 10j। V_ct = 10i - 10j। এর মান |V_ct| = sqrt(10² + (-10)²) = sqrt(200) = 10√2 m/s।"
+            },
+             {
+                question: "একজন লোক বৃষ্টির হাত থেকে বাঁচতে ছাতা খাড়াভাবে ধরে আছে। যদি সে দ্বিগুণ বেগে দৌড়ায়, তাহলে ছাতা কোনাকুনিভাবে ধরতে হয়। বৃষ্টি ও লোকের বেগের অনুপাত কত?",
+                options: ["1:1", "1:√2", "√3:1", "1:√3"],
+                answer: "1:√3",
+                explanation: "ধরি, বৃষ্টির বেগ Vr, লোকের বেগ Vm। কোণ tanθ = Vm/Vr। যখন সে দ্বিগুণ বেগে (2Vm) দৌড়ায়, কোণ θ হয়। একটি বিশেষ ক্ষেত্রে যখন θ=45° হলে Vm/Vr=1 হয় এবং কোণাকুণি হয়। সাধারণ ক্ষেত্রে যখন θ কোণে হেলে থাকে, tan(θ)=Vm/Vr।"
+            },
+            {
+                question: "সর্বনিম্ন দূরত্বে নদী পার হতে হলে নৌকা কোন দিকে চালাতে হবে?",
+                options: ["স্রোতের সাথে সমকোণে", "স্রোতের প্রতিকূলে একটি নির্দিষ্ট কোণে", "স্রোতের অনুকূলে", "সরাসরি অপর পাড়ের দিকে"],
+                answer: "স্রোতের প্রতিকূলে একটি নির্দিষ্ট কোণে",
+                explanation: "সর্বনিম্ন দূরত্বে (সোজা অপর পাড়ে) নদী পার হতে হলে, লব্ধি বেগটি নদীর পাড়ের সাথে লম্ব হতে হবে। এর জন্য নৌকার বেগের একটি উপাংশকে স্রোতের বেগ নাকচ করতে হয়, তাই নৌকাকে স্রোতের বিপরীতে একটি কোণে চালাতে হবে।"
+            },
+            {
+                question: "কোনো বস্তুকে অনুভূমিকের সাথে 45° কোণে নিক্ষেপ করলে এর পাল্লা (Range) সর্বাধিক হয়। এই তথ্যটি কোন ধারণার উপর নির্ভরশীল?",
+                options: ["ভেক্টর যোগ", "ভেক্টর বিয়োজন", "স্কেলার গুণন", "ডট গুণন"],
+                answer: "ভেক্টর বিয়োজন",
+                explanation: "নিক্ষেপের বেগটিকে দুটি উপাংশে (অনুভূমিক ও উলম্ব) ভাগ করা হয়। এই উপাংশ দুটি ব্যবহার করে পাল্লা ও উচ্চতা নির্ণয় করা হয়, যা ভেক্টর বিয়োজনের একটি প্রয়োগ।"
+            },
+            {
+                question: "একটি বস্তুর উপর F = (3i + 4j) N বল প্রয়োগ করায় সরণ s = (2i - j) m হল। কৃতকাজ কত?",
+                options: ["10 J", "6 J", "2 J", "4 J"],
+                answer: "2 J",
+                explanation: "কাজ (W) হলো বল (F) এবং সরণের (s) ডট গুণফল। W = F · s = (3i + 4j) · (2i - j) = (3*2) + (4*-1) = 6 - 4 = 2 জুল।"
+            },
+            {
+                question: "যদি কোনো কণার ত্বরণ a = (2i + 3j) m/s² হয় এবং কণাটি স্থির অবস্থা থেকে যাত্রা শুরু করে, 2s পর এর বেগ কত হবে?",
+                options: ["2i + 3j", "4i + 6j", "i + 1.5j", "8i + 12j"],
+                answer: "4i + 6j",
+                explanation: "ভেক্টরের গতিসূত্র v = u + at ব্যবহার করে, যেখানে আদিবেগ u = 0। সুতরাং, v = 0 + (2i + 3j) * 2 = 4i + 6j m/s।"
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const overviewScreen = document.getElementById('overview-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const questionCounter = document.getElementById('question-counter');
+        const scoreDisplay = document.getElementById('score-display');
+        const timerText = document.getElementById('timer-text');
+        const timerBar = document.getElementById('timer-bar');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+
+        const overviewTitle = document.getElementById('overview-title');
+        const overviewSummary = document.getElementById('overview-summary');
+        const overviewList = document.getElementById('overview-list');
+        const continueBtn = document.getElementById('continue-btn');
+
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+        const TIME_LIMIT = 37;
+        let timeLeft = TIME_LIMIT;
+        let userAnswers = [];
+
+        startBtn.addEventListener('click', startGame);
+        continueBtn.addEventListener('click', continueQuiz);
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            scoreDisplay.textContent = 'স্কোর: 0';
+            showScreen('quiz-screen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            resetState();
+            
+            if(currentQuestionIndex >= questions.length){
+                showOverview(true); // Final overview
+                return;
+            }
+
+            const currentQuestion = questions[currentQuestionIndex];
+            questionCounter.textContent = `প্রশ্ন ${currentQuestionIndex + 1}/${questions.length}`;
+            questionText.textContent = currentQuestion.question;
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-btn');
+                button.addEventListener('click', () => selectAnswer(button, option));
+                optionsContainer.appendChild(button);
+            });
+            startTimer();
+        }
+        
+        function startTimer() {
+            timeLeft = TIME_LIMIT;
+            timerText.textContent = timeLeft;
+            timerBar.style.width = '100%';
+            timerBar.style.transition = `width ${TIME_LIMIT}s linear`;
+            
+            // This timeout trigger the width change for CSS transition
+            setTimeout(() => {
+                timerBar.style.width = '0%';
+            }, 50);
+
+            timer = setInterval(() => {
+                timeLeft--;
+                timerText.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    selectAnswer(null, null); // Time's up
+                }
+            }, 1000);
+        }
+
+        function resetState() {
+            clearInterval(timer);
+            optionsContainer.innerHTML = '';
+            timerBar.style.transition = 'none'; // reset transition for instant change
+        }
+        
+        function selectAnswer(selectedButton, selectedOption) {
+            clearInterval(timer);
+            timerBar.style.transition = 'none'; // Stop the bar animation abruptly
+            const correctOption = questions[currentQuestionIndex].answer;
+            const isCorrect = selectedOption === correctOption;
+            
+            userAnswers.push({
+                question: questions[currentQuestionIndex].question,
+                yourAnswer: selectedOption === null ? 'সময় শেষ' : selectedOption,
+                correctAnswer: correctOption,
+                explanation: questions[currentQuestionIndex].explanation,
+                isCorrect: isCorrect,
+            });
+
+            Array.from(optionsContainer.children).forEach(button => {
+                if(button.textContent === correctOption) {
+                    button.classList.add('correct');
+                }
+                 if(button === selectedButton && !isCorrect) {
+                    button.classList.add('incorrect');
+                }
+                button.disabled = true;
+            });
+            
+            if (isCorrect) {
+                score++;
+                scoreDisplay.textContent = `স্কোর: ${score}`;
+            }
+
+            setTimeout(handleNext, 1500);
+        }
+
+        function handleNext(){
+            currentQuestionIndex++;
+            // Show overview after every 10 questions or at the end
+            if(currentQuestionIndex % 10 === 0 && currentQuestionIndex > 0) {
+                showOverview(currentQuestionIndex === questions.length);
+            } else {
+                 loadQuestion();
+            }
+        }
+
+        function showOverview(isFinal) {
+            showScreen('overview-screen');
+            let start = Math.floor((currentQuestionIndex -1) / 10) * 10;
+            let end = currentQuestionIndex;
+
+            overviewTitle.textContent = isFinal ? 'চূড়ান্ত ফলাফল' : `পার্ট ${end/10} এর সারসংক্ষেপ`;
+
+            let sectionCorrect = 0;
+            let sectionIncorrect = 0;
+            
+            overviewList.innerHTML = '';
+
+            for(let i=0; i < end; i++){
+                const answer = userAnswers[i];
+                if(i >= start){ // Only count stats for the current 10-question section
+                     if (answer.isCorrect) sectionCorrect++;
+                     else sectionIncorrect++;
+                }
+
+                const item = document.createElement('div');
+                item.classList.add('overview-item');
+                const statusIcon = answer.isCorrect ? '✔' : '✖';
+                const statusClass = answer.isCorrect ? 'status-correct' : 'status-incorrect';
+                
+                item.innerHTML = `
+                    <div class="overview-status ${statusClass}">${statusIcon}</div>
+                    <p class="question"><strong>প্রশ্ন ${i + 1}:</strong> ${answer.question}</p>
+                    <p><strong>তোমার উত্তর:</strong> ${answer.yourAnswer}</p>
+                    <p><strong>সঠিক উত্তর:</strong> ${answer.correctAnswer}</p>
+                    <p class="explanation"><strong>ব্যাখ্যা:</strong> ${answer.explanation}</p>
+                `;
+                overviewList.prepend(item); // prepend to show latest questions first
+            }
+            
+            overviewSummary.innerHTML = `
+                <span class="summary-correct">✔ মোট সঠিক: ${score}</span>
+                <span class="summary-incorrect">✖ মোট ভুল: ${currentQuestionIndex - score}</span>
+            `;
+            
+            if(isFinal) {
+                continueBtn.textContent = 'পুনরায় খেলুন';
+            } else {
+                continueBtn.textContent = 'পরবর্তী ধাপে যান';
+            }
+        }
+
+        function continueQuiz() {
+            if (currentQuestionIndex >= questions.length) {
+                // Restart the game
+                showScreen('start-screen');
+            } else {
+                // Continue to the next set of questions
+                showScreen('quiz-screen');
+                loadQuestion();
+            }
+        }
+        
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+    </script>
+</body>
+</html>
