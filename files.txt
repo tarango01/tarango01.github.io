@@ -1,0 +1,2 @@
+url:tarango01.github.io/files/ai_studio_code (100).html, location:(mainfile)/HTML/Prototype 1 Quiz Game
+url:tarango01.github.io/files/1-5 Day English Vocabulary.pdf, location:(mainfile)/PDF/1-5 Day English Vocabulary.pdf
